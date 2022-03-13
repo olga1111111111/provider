@@ -2,128 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class Complex {
-  final int valueOne;
-  final int valueTwo;
-  Complex({
-    required this.valueOne,
-    required this.valueTwo,
-  });
-
-  Complex copyWith({
-    int? valueOne,
-    int? valueTwo,
-  }) {
-    return Complex(
-      valueOne: valueOne ?? this.valueOne,
-      valueTwo: valueTwo ?? this.valueTwo,
-    );
-  }
-
-  @override
-  String toString() => 'Complex(valueOne: $valueOne, valueTwo: $valueTwo)';
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is Complex &&
-        other.valueOne == valueOne &&
-        other.valueTwo == valueTwo;
-  }
-
-  @override
-  int get hashCode => valueOne.hashCode ^ valueTwo.hashCode;
+  var valueOne = 0;
+  var valueTwo = 0;
 }
 
-class Model {
-  final int one;
-  final int two;
-  final Complex complex;
-  Model({
-    required this.one,
-    required this.two,
-    required this.complex,
-  });
+class Model extends ChangeNotifier {
+  var one = 0;
+  var two = 0;
+  final complex = Complex();
 
-  Model copyWith({
-    int? one,
-    int? two,
-    Complex? complex,
-  }) {
-    return Model(
-      one: one ?? this.one,
-      two: two ?? this.two,
-      complex: complex ?? this.complex,
-    );
-  }
-
-  @override
-  String toString() => 'Model(one: $one, two: $two, complex: $complex)';
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is Model &&
-        other.one == one &&
-        other.two == two &&
-        other.complex == complex;
-  }
-
-  @override
-  int get hashCode => one.hashCode ^ two.hashCode ^ complex.hashCode;
-}
-
-class ExampleWidget extends StatefulWidget {
-  const ExampleWidget({Key? key}) : super(key: key);
-
-  @override
-  State<ExampleWidget> createState() => _ExampleWidgetState();
-}
-
-class _ExampleWidgetState extends State<ExampleWidget> {
-  var model = Model(one: 0, two: 0, complex: Complex(valueOne: 0, valueTwo: 0));
   void inc1() {
-    // model = Model(one: model.one + 1, two: model.two);
-    model = model.copyWith(one: model.one + 1);
-    setState(() {});
+    one += 1;
+    notifyListeners();
   }
 
   void inc2() {
-    // model = Model(one: model.one, two: model.two + 1);
-    model = model.copyWith(two: model.two + 1);
-    setState(() {});
+    two += 1;
+    notifyListeners();
   }
 
   void incComplex1() {
-    final complex1 =
-        model.complex.copyWith(valueOne: model.complex.valueOne + 1);
-    model = model.copyWith(complex: complex1);
-    setState(() {});
+    complex.valueOne += 1;
+    notifyListeners();
   }
 
   void incComplex2() {
-    final complex2 =
-        model.complex.copyWith(valueTwo: model.complex.valueTwo + 1);
-    model = model.copyWith(complex: complex2);
-    setState(() {});
+    complex.valueTwo += 1;
+    notifyListeners();
   }
+}
+
+class ExampleWidget extends StatelessWidget {
+  const ExampleWidget({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => MultiProvider(
-        providers: [
-          Provider.value(value: this),
-          Provider.value(value: model),
-        ],
+  Widget build(BuildContext context) => ChangeNotifierProvider(
+        create: (_) => Model(),
         child: const _View(),
       );
-  //  Provider.value(
-  //       value: this,
-  //       child: Provider.value(
-  //         value: model,
-  //         child: const _View(),
-  //       ),
-  //     );
 }
 
 class _View extends StatelessWidget {
@@ -131,25 +47,25 @@ class _View extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.read<_ExampleWidgetState>();
+    final model = context.read<Model>();
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             ElevatedButton(
-              onPressed: state.inc1,
+              onPressed: model.inc1,
               child: const Text('one'),
             ),
             ElevatedButton(
-              onPressed: state.inc2,
+              onPressed: model.inc2,
               child: const Text('two'),
             ),
             ElevatedButton(
-              onPressed: state.incComplex1,
+              onPressed: model.incComplex1,
               child: const Text('complex1'),
             ),
             ElevatedButton(
-              onPressed: state.incComplex2,
+              onPressed: model.incComplex2,
               child: const Text('complex2'),
             ),
             const _OneWidget(),
